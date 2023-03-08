@@ -1,0 +1,25 @@
+library(rtracklayer)
+library(dplyr)
+library(ggtranscript)
+library(ggplot2)
+
+gtf <- import("gencode.v42.primary_assembly.annotation.gtf.gz")
+mknk2 <- gtf[gtf$gene_name == "MKNK2"]
+mknk2_exons <- mknk2[mknk2$type == "exon"]
+mknk2_exons <- mknk2_exons[mknk2_exons$transcript_type == "protein_coding"]
+
+mknk2_exons_df <- as.data.frame(mknk2_exons)
+
+mknk2_exons_df %>%
+  ggplot(aes(
+    xstart = start,
+    xend = end,
+    y = transcript_name
+  )) +
+  geom_range(
+    aes(fill = transcript_type)
+  ) +
+  geom_intron(
+    data = to_intron(mknk2_exons_df, "transcript_name"),
+    aes(strand = strand)
+  )
